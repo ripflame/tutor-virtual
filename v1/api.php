@@ -169,8 +169,7 @@ class API extends REST {
 
         $carga = array();
 
-        $materiasReporbadas = getFailed(substr($token, 0, 8), $this->db);
-
+        $materiasReporbadas = getFailedIds(substr($token, 0, 8), $this->db);
 
         $materiasPorCargar = getSubjectsToCharge(substr($token, 0, 8), $this->db);
 
