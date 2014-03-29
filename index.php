@@ -153,7 +153,7 @@ function getFailedSubjects($queryResult) {
     return $results;
 }
 
-function compararHorarios($horarios){
+function compararHorarios($horarios, $restriccionHoras = array('inicio' => "7:30",'fin' => "15:00");){
 
     $horarioFinal = array();
 
@@ -184,7 +184,7 @@ function compararHorarios($horarios){
     }
 
     // Restricciones de inicio y fin por horario ingresado.
-    $restriccionHoras = array('inicio' => "7:30",'fin' => "15:01");
+    
     $horaIngresadaInicio = $restriccionHoras['inicio'];
     $horaIngresadaFin = $restriccionHoras['fin'];
 
@@ -500,8 +500,10 @@ function compararHorarios($horarios){
             }
         }
     }
-    prettyArray($horarioFinal);
-    die();
+    // prettyArray($horarioFinal);
+    // die();
+
+    return $horarioFinal;
   
 }
 ?>
