@@ -27,9 +27,9 @@ if ($query) {
 
         $failedSubjects = array();
         foreach($query as $key => $value) {
-        if ($value['situacion'] == 0) {
-          $failedSubjects[$key] = $value;
-        }
+            if ($value['situacion'] == 0) {
+              $failedSubjects[$key] = $value;
+            }
         }
         // Aqui ya tengo todas las materias reprobadas sin contar las que se aprobaron luego
 
@@ -37,47 +37,44 @@ if ($query) {
 
         $passedSubjects = array();
         foreach($query as $key => $value) {
-        if ($value['situacion'] == 1) {
-          $passedSubjects[$key] = $value;
-        }
+          if ($value['situacion'] == 1) {
+            $passedSubjects[$key] = $value;
+          }
         }
         //Aqui ya tengo las materias aprobadas
         // prettyArray($passedSubjects);
 
         foreach($failedSubjects as $key => $value) {
-          foreach($passedSubjects as $key2 => $value2){
-              if ($value2['nombre'] == $value['nombre']){
-                  unset($failedSubjects[$key]);
-              }
-          }
-        }
+            foreach($passedSubjects as $key2 => $value2){
+                if ($value2['nombre'] == $value['nombre']){
+                    unset($failedSubjects[$key]);
+                }
+            }
+         }
         // Aqui ya tengo las materias reprobadas
         prettyArray($failedSubjects);
 
         $results = array();
 
-        foreach($failedSubjects as $entry){
-            $name = $entry['nombre'];
-            $results[$name]['nombre'] = $name;
+    foreach($failedSubjects as $entry){
+        $name = $entry['nombre'];
+        $results[$name]['nombre'] = $name;
 
-            if (isset($results[$name][$entry['periodo']])){
-                $results[$name]['periodos'][] += $entry['periodo'] . "-" . $entry['tipo'];
-            } else {
-                $results[$name]['periodos'][] = $entry['periodo'] . "-" . $entry['tipo'];
-            }
-            $results[$name]['situacion'] = $entry['situacion'];
+        if (isset($results[$name][$entry['periodo']])){
+            $results[$name]['periodos'][] += $entry['periodo'] . "-" . $entry['tipo'];
+            $results[$name]['periodos'][] += array('periodo' => $entry['periodo'], 'tipo' => $entry['tipo']);
+        } else {
+            $results[$name]['periodos'][] = array('periodo' => $entry['periodo'], 'tipo' => $entry['tipo']);
         }
-
-        $results = array_values($results);
-
-        prettyArray($results);
-
-        }
-
-        // prettyArray($result);
-
+        $results[$name]['situacion'] = $entry['situacion'];
+        $results[$name]['id'] = $entry['id'];
     }
 
+    $results = array_values($results);
 
+    // Aqui ya tengo la relacion completa de materias reprobadas
+    prettyArray($results);
 
+    }
+}
 ?>
