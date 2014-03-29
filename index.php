@@ -58,8 +58,6 @@ function getSubjectsToChange($failedSubjects){
         }
     }
 
-    prettyArray($results);
-
     return $results;
 }
 
@@ -141,12 +139,5 @@ function compararHorarios($horarios){
 
 
     }
-
-
-
-
-
-
-        
 }
 ?>
