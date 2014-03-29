@@ -502,6 +502,7 @@ function compararHorarios($horarios, $restriccionHoras = array('inicio' => "7:30
     }
     // prettyArray($horarioFinal);
     // die();
+    
 
     return $horarioFinal;
   
