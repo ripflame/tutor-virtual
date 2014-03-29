@@ -61,10 +61,11 @@ if ($query) {
             $results[$name]['nombre'] = $name;
 
             if (isset($results[$name][$entry['periodo']])){
-                $results[$name]['periodos'][] += $entry['periodo'];
+                $results[$name]['periodos'][] += $entry['periodo'] . "-" . $entry['tipo'];
             } else {
-                $results[$name]['periodos'][] = $entry['periodo'];
+                $results[$name]['periodos'][] = $entry['periodo'] . "-" . $entry['tipo'];
             }
+            $results[$name]['situacion'] = $entry['situacion'];
         }
 
         $results = array_values($results);
