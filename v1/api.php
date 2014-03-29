@@ -172,7 +172,7 @@ class API extends REST {
         $materiasReporbadas = getFailed(substr($token, 0, 8), $this->db);
 
 
-        // $materiasPorCargar = getSubjectsCharge(substr($token, 0, 8), $this->db);
+        $materiasPorCargar = getSubjectsToCharge(substr($token, 0, 8), $this->db);
 
         $materiasPorCargar =array();
 

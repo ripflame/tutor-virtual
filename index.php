@@ -26,12 +26,12 @@ function getFailed($matricula, $db){
             // prettyArray(getFailedSubjectsIds($results));
             // prettyArray($results);
             // return getFailedSubjectsIds($results);
-            return getSubjectsToChange($results);
+            return getSubjectsToCharge($results);
         }
     }
 }
 
-function getSubjectsToChange($failedSubjects){
+function getSubjectsToCharge($failedSubjects){
     $results = array();
 
     foreach($failedSubjects as $key => $value){
@@ -57,6 +57,7 @@ function getSubjectsToChange($failedSubjects){
             $results[] = array('id' => $value['id'], 'tipo' => 0);
         }
     }
+    
 
     return $results;
 }
