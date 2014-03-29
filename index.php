@@ -96,4 +96,26 @@ function getFailedSubjects($queryResult) {
     // prettyArray($results);
     return $results;
 }
+
+function compararHorarios($horarios){
+    prettyArray($horarios);
+    die();
+    $ordenadosHorarios  = array();
+
+    foreach ($horarios as $key => $value) {
+
+        $idMateria = $value['id'];
+        unset($value['id']);
+        $ordenadosHorarios[ $idMateria ] = $value;
+
+
+    }
+
+
+
+
+
+
+        
+}
 ?>
