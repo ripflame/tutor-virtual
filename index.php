@@ -154,17 +154,354 @@ function getFailedSubjects($queryResult) {
 }
 
 function compararHorarios($horarios){
-    prettyArray($horarios);
-    die();
-    $ordenadosHorarios  = array();
 
+    $horarioFinal = array();
+
+    // shuffle($horarios); // Se randomiza para seleccionar una materia al azar.
+    // falta Query para ordenar por nombre.
+
+    $i = 0;
     foreach ($horarios as $key => $value) {
+        // Se selecciona la primera materia.
+        if ($horarioFinal[$i] == null) {
+            $horarioFinal[$i] = $value;
 
-        $idMateria = $value['id'];
-        unset($value['id']);
-        $ordenadosHorarios[ $idMateria ] = $value;
+        } elseif ($horarioFinal[$i] == $value['id']) { // Verificamos si la asignatura ya está cargada.
+            // De aparecer nuevamente, es ignorada.
 
-
+        } elseif($horarioFinal[$i]['id'] != $value['id']) { // De no estar cargada, se verifica que no choquen los horarios
+            // Verificamos si coinciden en horario
+            if ( ($horarioFinal[$i]['lunes'] != null && $horarioFinal[$i]['lunes'] == $value['lunes']) 
+                || ($horarioFinal[$i]['martes'] != null && $horarioFinal[$i]['lunes'] == $value['martes'])
+                || ($horarioFinal[$i]['miercoles'] != null && $horarioFinal[$i]['lunes'] == $value['miercoles'])
+                || ($horarioFinal[$i]['jueves'] != null && $horarioFinal[$i]['lunes'] == $value['jueves'])
+                || ($horarioFinal[$i]['viernes'] != null && $horarioFinal[$i]['lunes'] == $value['viernes']) ) {
+            } else {
+                $i++;
+                $horarioFinal[$i] = $value;
+            }
+        } 
     }
+
+    // Restricciones de inicio y fin por horario ingresado.
+    $restriccionHoras = array('inicio' => "7:30",'fin' => "15:01");
+    $horaIngresadaInicio = $restriccionHoras['inicio'];
+    $horaIngresadaFin = $restriccionHoras['fin'];
+
+    $format = 'H:i';
+    $date = DateTime::createFromFormat($format, $horaIngresadaInicio);
+    $horaConvertidaIngresadaInicio = $date->format('H:i');
+    
+    $date = DateTime::createFromFormat($format, $horaIngresadaFin);
+    $horaConvertidaIngresadaFin = $date->format('H:i');
+
+    $j = 0;
+    // Definimos las asignaturas que puede llevar con respecto a su horario ingresado.
+    foreach ($horarioFinal as $key => $value) {
+
+        // Extraemos el horario del lunes.
+        if($horarioFinal[$j]['lunes'] == null) {
+            // Si el horario de lunes está vacío es ignorado.
+            if($horarioFinal[$j]['martes'] == null) {
+                if($horarioFinal[$j]['miercoles'] == null) {
+                    if($horarioFinal[$j]['jueves'] == null) {
+                        if($horarioFinal[$j]['viernes'] == null) {
+                            
+                        } else {
+                            $horaAsignatura = explode('-', $horarioFinal[$j]['viernes']);
+                            // Separamos la hora de inicio y la hora de fin.
+                            $format = 'H:i';
+                            $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                            $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                            $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                            $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                            if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                // Si las condiciones establecidas se cumplen, preservamos la asignatura.
+
+                            } else {
+                                // En caso de incumplimiento, descartamos la materia de la oferta.
+                                unset($horarioFinal[$j]);
+                            }
+                        } 
+                    } else {
+                        $horaAsignatura = explode('-', $horarioFinal[$j]['jueves']);
+                        // Separamos la hora de inicio y la hora de fin.
+                        $format = 'H:i';
+                        $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                        $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                        $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                        $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                        if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                            // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                            // Extraemos el horario del viernes.
+                            if($horarioFinal[$j]['viernes'] == null) {
+                                // Si el horario de viernes está vacío es ignorado.
+                            } else {
+                                $horaAsignatura = explode('-', $horarioFinal[$j]['viernes']);
+                                // Separamos la hora de inicio y la hora de fin.
+                                $format = 'H:i';
+                                $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                                $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                                $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                                $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                                if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                    // Si las condiciones establecidas se cumplen, preservamos la asignatura.
+
+                                } else {
+                                    // En caso de incumplimiento, descartamos la materia de la oferta.
+                                    unset($horarioFinal[$j]);
+                                }
+                            }
+                        } else {
+                            // En caso de incumplimiento, descartamos la materia de la oferta.
+                            unset($horarioFinal[$j]);
+                        }
+                    } 
+                } else {
+                    $horaAsignatura = explode('-', $horarioFinal[$j]['miercoles']);
+                            // Separamos la hora de inicio y la hora de fin.
+                            $format = 'H:i';
+                            $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                            $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                            $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                            $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                            if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                                // Extraemos el horario del jueves.
+                                if($horarioFinal[$j]['jueves'] == null) {
+                                    // Si el horario de jueves está vacío es ignorado.
+                                } else {
+                                    $horaAsignatura = explode('-', $horarioFinal[$j]['jueves']);
+                                    // Separamos la hora de inicio y la hora de fin.
+                                    $format = 'H:i';
+                                    $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                                    $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                                    $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                                    $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                                    if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                        // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                                        // Extraemos el horario del viernes.
+                                        if($horarioFinal[$j]['viernes'] == null) {
+                                            // Si el horario de viernes está vacío es ignorado.
+                                        } else {
+                                            $horaAsignatura = explode('-', $horarioFinal[$j]['viernes']);
+                                            // Separamos la hora de inicio y la hora de fin.
+                                            $format = 'H:i';
+                                            $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                                            $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                                            $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                                            $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                                            if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                                // Si las condiciones establecidas se cumplen, preservamos la asignatura.
+
+                                            } else {
+                                                // En caso de incumplimiento, descartamos la materia de la oferta.
+                                                unset($horarioFinal[$j]);
+                                            }
+                                        }
+                                    } else {
+                                        // En caso de incumplimiento, descartamos la materia de la oferta.
+                                        unset($horarioFinal[$j]);
+                                    }
+                                }                                
+                            } else {
+                                // En caso de incumplimiento, descartamos la materia de la oferta.
+                                unset($horarioFinal[$j]);
+                            }
+                } 
+            } else {
+                $horaAsignatura = explode('-', $horarioFinal[$j]['martes']);
+                    // Separamos la hora de inicio y la hora de fin.
+                    $format = 'H:i';
+                    $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                    $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                    $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                    $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                    if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                        // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                        // Extraemos el horario del miercoles.
+                        if($horarioFinal[$j]['miercoles'] == null) {
+                            // Si el horario de miercoles está vacío es ignorado.
+                        } else {
+                            $horaAsignatura = explode('-', $horarioFinal[$j]['miercoles']);
+                            // Separamos la hora de inicio y la hora de fin.
+                            $format = 'H:i';
+                            $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                            $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                            $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                            $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                            if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                                // Extraemos el horario del jueves.
+                                if($horarioFinal[$j]['jueves'] == null) {
+                                    // Si el horario de jueves está vacío es ignorado.
+                                } else {
+                                    $horaAsignatura = explode('-', $horarioFinal[$j]['jueves']);
+                                    // Separamos la hora de inicio y la hora de fin.
+                                    $format = 'H:i';
+                                    $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                                    $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                                    $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                                    $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                                    if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                        // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                                        // Extraemos el horario del viernes.
+                                        if($horarioFinal[$j]['viernes'] == null) {
+                                            // Si el horario de viernes está vacío es ignorado.
+                                        } else {
+                                            $horaAsignatura = explode('-', $horarioFinal[$j]['viernes']);
+                                            // Separamos la hora de inicio y la hora de fin.
+                                            $format = 'H:i';
+                                            $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                                            $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                                            $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                                            $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                                            if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                                // Si las condiciones establecidas se cumplen, preservamos la asignatura.
+
+                                            } else {
+                                                // En caso de incumplimiento, descartamos la materia de la oferta.
+                                                unset($horarioFinal[$j]);
+                                            }
+                                        }
+                                    } else {
+                                        // En caso de incumplimiento, descartamos la materia de la oferta.
+                                        unset($horarioFinal[$j]);
+                                    }
+                                }                                
+                            } else {
+                                // En caso de incumplimiento, descartamos la materia de la oferta.
+                                unset($horarioFinal[$j]);
+                            }
+                        }
+                    } else {
+                        // En caso de incumplimiento, descartamos la materia de la oferta.
+                        unset($horarioFinal[$j]);
+                    }
+            }
+        } else {
+            echo $j;
+            $horaAsignatura = explode('-', $horarioFinal[$j]['lunes']);
+            // Separamos la hora de inicio y la hora de fin.
+            $format = 'H:i';
+            $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+            $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+            $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+            $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+            if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                // Extraemos el horario del martes.
+                if($horarioFinal[$j]['martes'] == null) {
+                    // Si el horario de martes está vacío es ignorado.
+                } else {
+                    $horaAsignatura = explode('-', $horarioFinal[$j]['martes']);
+                    // Separamos la hora de inicio y la hora de fin.
+                    $format = 'H:i';
+                    $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                    $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                    $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                    $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                    if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                        // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                        // Extraemos el horario del miercoles.
+                        if($horarioFinal[$j]['miercoles'] == null) {
+                            // Si el horario de miercoles está vacío es ignorado.
+                        } else {
+                            $horaAsignatura = explode('-', $horarioFinal[$j]['miercoles']);
+                            // Separamos la hora de inicio y la hora de fin.
+                            $format = 'H:i';
+                            $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                            $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                            $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                            $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                            if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                                // Extraemos el horario del jueves.
+                                if($horarioFinal[$j]['jueves'] == null) {
+                                    // Si el horario de jueves está vacío es ignorado.
+                                } else {
+                                    $horaAsignatura = explode('-', $horarioFinal[$j]['jueves']);
+                                    // Separamos la hora de inicio y la hora de fin.
+                                    $format = 'H:i';
+                                    $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                                    $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                                    $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                                    $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                                    if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                        // Si las condiciones establecidas se cumplen, preservamos la asignatura y revisamos el siguiente dia.
+                                        // Extraemos el horario del viernes.
+                                        if($horarioFinal[$j]['viernes'] == null) {
+                                            // Si el horario de viernes está vacío es ignorado.
+                                        } else {
+                                            $horaAsignatura = explode('-', $horarioFinal[$j]['viernes']);
+                                            // Separamos la hora de inicio y la hora de fin.
+                                            $format = 'H:i';
+                                            $date = DateTime::createFromFormat($format, $horaAsignatura[0]);
+                                            $horaConvertidaAsignagnaturaInicio = $date->format('H:i');
+
+                                            $date = DateTime::createFromFormat($format, $horaAsignatura[1]);
+                                            $horaConvertidaAsignagnaturaFin = $date->format('H:i');
+
+                                            if ( (($horaConvertidaIngresadaInicio < $horaConvertidaAsignagnaturaInicio) && ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio)) || ($horaConvertidaIngresadaInicio >= $horaConvertidaAsignagnaturaFin) || ($horaConvertidaIngresadaFin <= $horaConvertidaAsignagnaturaInicio) ) { 
+                                                // Si las condiciones establecidas se cumplen, preservamos la asignatura.
+
+                                            } else {
+                                                // En caso de incumplimiento, descartamos la materia de la oferta.
+                                                unset($horarioFinal[$j]);
+                                            }
+                                        }
+                                    } else {
+                                        // En caso de incumplimiento, descartamos la materia de la oferta.
+                                        unset($horarioFinal[$j]);
+                                    }
+                                }                                
+                            } else {
+                                // En caso de incumplimiento, descartamos la materia de la oferta.
+                                unset($horarioFinal[$j]);
+                            }
+                        }
+                    } else {
+                        // En caso de incumplimiento, descartamos la materia de la oferta.
+                        unset($horarioFinal[$j]);
+                    }
+                }                
+            } else {
+                // En caso de incumplimiento, descartamos la materia de la oferta.
+                unset($horarioFinal[$j]);
+                $j++;
+            }
+        }
+    }
+    prettyArray($horarioFinal);
+    die();
+  
 }
 ?>
