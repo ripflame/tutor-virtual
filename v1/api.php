@@ -167,7 +167,15 @@ class API extends REST {
             $this->response($this->json($error), 400);
         }
 
+        $carga = array();
+
         $materiasReporbadas = getFailed(substr($token, 0, 8), $this->db);
+
+
+        // $materiasPorCargar = getSubjectsCharge(substr($token, 0, 8), $this->db);
+
+        $materiasPorCargar =array();
+
 
         $asignaturasACursar = $this->db->ExecuteSQL("SELECT o.`id_asignatura` FROM oferta AS o LEFT JOIN `asignatura_requisito` ar ON ar.`id_obligatoria` = o.`id_asignatura` LEFT JOIN `kardex` k ON ar.`id_requisito` = k.`id_asignatura` LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura` WHERE k.`situacion` = 1 GROUP BY o.`id_asignatura`");
 
@@ -220,6 +228,16 @@ class API extends REST {
                             }
                         }
 
+                        $extraordinarios = array();
+
+
+                        foreach ($materiasPorCargar as $key => $value) {
+                            if ($value['tipo'] == 0) {
+                                $materiasACurso[] = $value['id'];
+                            }elseif ($value['tipo'] == 0) {
+                                $extraordinarios[] = $value['id'];
+                            }
+                        }
 
                         $materiasACursoWhere = "WHERE ";
                 
@@ -232,9 +250,24 @@ class API extends REST {
                             $materiasACursoWhere .= " ";
                         }
 
-                        $asignaturasACursar = $this->db->ExecuteSQL("SELECT a.`nombre`, o.`profesor`, o.`lunes`, o.`martes`, o.`miercoles`, o.`jueves`, o.`viernes` FROM oferta AS o LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura`" . $materiasACursoWhere);
+                        $extraordinariosWhere = "WHERE ";
                         
+                        for ($i=0; $i < count($extraordinarios); $i++) { 
+                            if ($i==0) {
+                                $extraordinariosWhere .= "a.`id` = ". $extraordinarios[$i];
+                            }else{
+                                $extraordinariosWhere .= "OR a.`id` = ". $extraordinarios[$i];
+                            }
+                            $extraordinariosWhere .= " ";
+                        }
+
+                        $materiasACursoWhere .= "OR a.`id` = 7"; //TESTING
+
+                        $extraordinariosAPresentar = $this->db->ExecuteSQL("SELECT a.`nombre` FROM asignatura " .  $extraordinariosWhere);
+
+                        $asignaturasACursar = $this->db->ExecuteSQL("SELECT a.`id`,a.`nombre`, o.`profesor`, o.`lunes`, o.`martes`, o.`miercoles`, o.`jueves`, o.`viernes` FROM oferta AS o LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura`" . $materiasACursoWhere);
                         
+                        compararHorarios($asignaturasACursar);
 
                         $this->response($this->json($asignaturasACursar), 200);
                     }
