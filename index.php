@@ -22,39 +22,55 @@ if ($query) {
     if (is_bool($query)) {
         echo "El alumno no ha cursado materias.";
     }else{
-        // prettyArray($query);
-        // Aqui ya tengo todas las materias cursadas
+        $results = getFailedSubjects($query);
+        prettyArray($results);
+        prettyArray(getFailedSubjectsIds($results));
+    }
+}
 
-        $failedSubjects = array();
-        foreach($query as $key => $value) {
-            if ($value['situacion'] == 0) {
-              $failedSubjects[$key] = $value;
+function getFailedSubjectsIds($failedSubjects){
+    $results = array();
+
+    foreach($failedSubjects as $subject){
+        $results[] = $subject['id'];
+    }
+    return $results;
+}
+
+function getFailedSubjects($queryResult) {
+    // prettyArray($query);
+    // Aqui ya tengo todas las materias cursadas
+
+    $failedSubjects = array();
+    foreach($queryResult as $key => $value) {
+        if ($value['situacion'] == 0) {
+          $failedSubjects[$key] = $value;
+        }
+    }
+    // Aqui ya tengo todas las materias reprobadas sin contar las que se aprobaron luego
+
+    // prettyArray($failedSubjects);
+
+    $passedSubjects = array();
+    foreach($queryResult as $key => $value) {
+      if ($value['situacion'] == 1) {
+        $passedSubjects[$key] = $value;
+      }
+    }
+    //Aqui ya tengo las materias aprobadas
+    // prettyArray($passedSubjects);
+
+    foreach($failedSubjects as $key => $value) {
+        foreach($passedSubjects as $key2 => $value2){
+            if ($value2['nombre'] == $value['nombre']){
+                unset($failedSubjects[$key]);
             }
         }
-        // Aqui ya tengo todas las materias reprobadas sin contar las que se aprobaron luego
+     }
+    // Aqui ya tengo las materias reprobadas
+    // prettyArray($failedSubjects);
 
-        // prettyArray($failedSubjects);
-
-        $passedSubjects = array();
-        foreach($query as $key => $value) {
-          if ($value['situacion'] == 1) {
-            $passedSubjects[$key] = $value;
-          }
-        }
-        //Aqui ya tengo las materias aprobadas
-        // prettyArray($passedSubjects);
-
-        foreach($failedSubjects as $key => $value) {
-            foreach($passedSubjects as $key2 => $value2){
-                if ($value2['nombre'] == $value['nombre']){
-                    unset($failedSubjects[$key]);
-                }
-            }
-         }
-        // Aqui ya tengo las materias reprobadas
-        prettyArray($failedSubjects);
-
-        $results = array();
+    $results = array();
 
     foreach($failedSubjects as $entry){
         $name = $entry['nombre'];
@@ -73,8 +89,7 @@ if ($query) {
     $results = array_values($results);
 
     // Aqui ya tengo la relacion completa de materias reprobadas
-    prettyArray($results);
-
-    }
+    // prettyArray($results);
+    return $results;
 }
 ?>
