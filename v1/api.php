@@ -167,7 +167,86 @@ class API extends REST {
             $this->response($this->json($error), 400);
         }
 
-        $this->response($this->json(getFailed(substr($token, 0, 8), $this->db)), 200);
+        $materiasReporbadas = getFailed(substr($token, 0, 8), $this->db);
+
+        $asignaturasACursar = $this->db->ExecuteSQL("SELECT o.`id_asignatura` FROM oferta AS o LEFT JOIN `asignatura_requisito` ar ON ar.`id_obligatoria` = o.`id_asignatura` LEFT JOIN `kardex` k ON ar.`id_requisito` = k.`id_asignatura` LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura` WHERE k.`situacion` = 1 GROUP BY o.`id_asignatura`");
+
+        if ($asignaturasACursar) { 
+
+            if (is_bool($asignaturasACursar)) {
+
+                echo "El alumno no puede cursar materias."; 
+
+            }else{
+
+                $disponibles = array();
+
+                $asignaturaDependenciasWhere = "WHERE ";
+                
+                for ($i=0; $i < count($asignaturasACursar); $i++) { 
+                    if ($i==0) {
+                        $asignaturaDependenciasWhere .= "ar.`id_obligatoria` = ". $asignaturasACursar[$i]['id_asignatura'];
+                    }else{
+                        $asignaturaDependenciasWhere .= "OR ar.`id_obligatoria` = ". $asignaturasACursar[$i]['id_asignatura'];
+                    }
+                    $asignaturaDependenciasWhere .= " ";
+                }
+
+                $asignaturaDependencias = $this->db->ExecuteSQL("SELECT ar.`id_obligatoria`, ar.`id_requisito` FROM `asignatura_requisito` AS ar " . $asignaturaDependenciasWhere);
+
+                if ($asignaturaDependencias) {
+                    if (is_bool($asignaturaDependencias)) {
+                        echo "El alumno no puede cursar materias.";
+                    }else{
+
+                        $materias = array();
+
+                        foreach ($asignaturaDependencias as $value) {
+
+                            $idMateriaPrincipal = $value['id_obligatoria'];
+                            $materias[$idMateriaPrincipal][] = $value['id_requisito'];
+                        }
+
+                        $materiasACurso = array();
+
+                        foreach ($materias as $key => $value) {
+                            $result = array_intersect($materias[$key], $materiasReporbadas);
+
+                            if (count($result)>0) {
+
+                            }else{
+
+                                $materiasACurso[] = $key;
+                            }
+                        }
+
+
+                        $materiasACursoWhere = "WHERE ";
+                
+                        for ($i=0; $i < count($materiasACurso); $i++) { 
+                            if ($i==0) {
+                                $materiasACursoWhere .= "a.`id` = ". $materiasACurso[$i];
+                            }else{
+                                $materiasACursoWhere .= "OR a.`id` = ". $materiasACurso[$i];
+                            }
+                            $materiasACursoWhere .= " ";
+                        }
+
+                        $asignaturasACursar = $this->db->ExecuteSQL("SELECT a.`nombre`, o.`profesor`, o.`lunes`, o.`martes`, o.`miercoles`, o.`jueves`, o.`viernes` FROM oferta AS o LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura`" . $materiasACursoWhere);
+                        
+                        
+
+                        $this->response($this->json($asignaturasACursar), 200);
+                    }
+
+                    
+                }
+            }
+
+            
+        }
+
+
 
 
     }
