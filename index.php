@@ -5,9 +5,6 @@
 
 require 'helpers.php';
 
-// getFailed('12216317');
-
-
 function getFailed($matricula, $db){
     $query = $db->ExecuteSQL("SELECT
         a.`id`
@@ -27,9 +24,43 @@ function getFailed($matricula, $db){
             $results = getFailedSubjects($query);
             // prettyArray($results);
             // prettyArray(getFailedSubjectsIds($results));
-            return getFailedSubjectsIds($results);
+            // prettyArray($results);
+            // return getFailedSubjectsIds($results);
+            return getSubjectsToChange($results);
         }
     }
+}
+
+function getSubjectsToChange($failedSubjects){
+    $results = array();
+
+    foreach($failedSubjects as $key => $value){
+        $numOrdinarios = 0;
+        $numExtras = 0;
+        foreach($value['periodos'] as $periodo){
+            if ($periodo['tipo'] == 0){
+                $numOrdinarios += 1;
+            } elseif ($periodo['tipo'] == 1){
+                $numExtras += 1;
+            }
+        }
+
+        if ($numOrdinarios == 2 && $numExtras == 1){
+            $results[] = array('id' => $value['id'], 'tipo' => 1);
+        } elseif ($numOrdinarios == 1 && $numExtras == 0){
+            $results[] = array('id' => $value['id'], 'tipo' => 1);
+        } elseif ($numOrdinarios == 2 && $numExtras ==0){
+            $results[] = array('id' => $value['id'], 'tipo' => 1);
+        } elseif ($numOrdinarios == 1 && $numExtras == 1){
+            $results[] = array('id' => $value['id'], 'tipo' => 0);
+        } elseif ($numOrdinarios == 1 && $numExtras == 2) {
+            $results[] = array('id' => $value['id'], 'tipo' => 0);
+        }
+    }
+
+    prettyArray($results);
+
+    return $results;
 }
 
 function getFailedSubjectsIds($failedSubjects){
