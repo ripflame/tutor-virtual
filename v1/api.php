@@ -9,7 +9,7 @@ class API extends REST {
     public $data = "";
     const DB_SERVER = "localhost";
     const DB_USER = "root";
-    const DB_PASSWORD = "password";
+    const DB_PASSWORD = "JoseCuervo";
     const DB = "tutorvirtual";
 
     private $db = NULL;
