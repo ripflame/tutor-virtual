@@ -31,6 +31,32 @@ function getFailed($matricula, $db){
     }
 }
 
+function getFailedIds($matricula, $db){
+    $query = $db->ExecuteSQL("SELECT
+        a.`id`
+        , a.`nombre`
+        , k.`tipo`
+        , k.`situacion`
+        , k.`periodo`
+        FROM kardex AS k
+        LEFT JOIN asignatura AS a ON a.`id` = k.`id_asignatura`
+        WHERE k.`matricula` = " . $matricula . "
+        Order by rand()");
+
+    if ($query) {
+        if (is_bool($query)) {
+            echo "El alumno no ha cursado materias.";
+        }else{
+            $results = getFailedSubjects($query);
+            // prettyArray($results);
+            // prettyArray(getFailedSubjectsIds($results));
+            // prettyArray($results);
+            return getFailedSubjectsIds($results);
+            // return getSubjectsToCharge($results);
+        }
+    }
+}
+
 function getSubjectsToCharge($failedSubjects){
     $results = array();
 
