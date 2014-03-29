@@ -1,30 +1,34 @@
 <?php
 
-require 'class.mysql.php';
-require 'class.rest.php';
+// require 'class.mysql.php';
+// require 'class.rest.php';
 
 require 'helpers.php';
 
-$mysql = new MySQL("tutorvirtual", "root", "JoseCuervo");
+// getFailed('12216317');
 
-$query = $mysql->ExecuteSQL("SELECT
-    a.`id`
-    , a.`nombre`
-    , k.`tipo`
-    , k.`situacion`
-    , k.`periodo`
-    FROM kardex AS k
-    LEFT JOIN asignatura AS a ON a.`id` = k.`id_asignatura`
-    WHERE k.`matricula` = 12216317
-    Order by rand()");
 
-if ($query) {
-    if (is_bool($query)) {
-        echo "El alumno no ha cursado materias.";
-    }else{
-        $results = getFailedSubjects($query);
-        prettyArray($results);
-        prettyArray(getFailedSubjectsIds($results));
+function getFailed($matricula, $db){
+    $query = $db->ExecuteSQL("SELECT
+        a.`id`
+        , a.`nombre`
+        , k.`tipo`
+        , k.`situacion`
+        , k.`periodo`
+        FROM kardex AS k
+        LEFT JOIN asignatura AS a ON a.`id` = k.`id_asignatura`
+        WHERE k.`matricula` = " . $matricula . "
+        Order by rand()");
+
+    if ($query) {
+        if (is_bool($query)) {
+            echo "El alumno no ha cursado materias.";
+        }else{
+            $results = getFailedSubjects($query);
+            // prettyArray($results);
+            // prettyArray(getFailedSubjectsIds($results));
+            return getFailedSubjectsIds($results);
+        }
     }
 }
 

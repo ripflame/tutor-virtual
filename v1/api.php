@@ -1,6 +1,7 @@
 <?php
 require_once("class.rest.php");
 require_once("class.mysql.php");
+require_once("../index.php");
 
 
 
@@ -8,7 +9,7 @@ class API extends REST {
     public $data = "";
     const DB_SERVER = "localhost";
     const DB_USER = "root";
-    const DB_PASSWORD = "";
+    const DB_PASSWORD = "JoseCuervo";
     const DB = "tutorvirtual";
 
     private $db = NULL;
@@ -35,7 +36,7 @@ class API extends REST {
         if((int)method_exists($this,$func) > 0)
             $this->$func();
         else
-            $this->response('',404); 
+            $this->response('',404);
         // If the method not exist with in this class, response would be "Page not found".
     }
 
@@ -77,9 +78,9 @@ class API extends REST {
         if (!isset($this->_request['pwd'])) {
             $password = NULL;
         }else{
-            $matricula = $this->_request['matricula']; 
+            $matricula = $this->_request['matricula'];
         }
-        
+
         // Input validations
         if(!empty($matricula) and !empty($password)){
 
@@ -97,7 +98,7 @@ class API extends REST {
                     $error = array('status' => "Failed", "msg" => "Invalid Email address or Password");
                     $this->response($this->json($error), 400);
                 }else{
-                    
+
                     $result = array("nombre" => $loginQuery['nombre'],
                         "hash" => $loginQuery['matricula'].$loginQuery['hash']);
 
@@ -128,7 +129,7 @@ class API extends REST {
         }
 
 
-    
+
 
         if (!$this->verifyToken($token)) {
             // If invalid inputs "Bad Request" status message and reason
@@ -140,8 +141,8 @@ class API extends REST {
 
         //GIL
 
-        
-        
+
+
         $error = array('status' => "Correct", "msg" => "You have access.");
         $this->response($this->json($error), 400);
     }
@@ -165,8 +166,10 @@ class API extends REST {
             $error = array('status' => "Failed", "msg" => "Invalid Email address or Password");
             $this->response($this->json($error), 400);
         }
-        
-        
+
+        $this->response($this->json(getFailed(substr($token, 0, 8), $this->db)), 200);
+
+
     }
 
 
