@@ -170,13 +170,21 @@ class API extends REST {
         $carga = array();
 
         $materiasReporbadas = getFailedIds(substr($token, 0, 8), $this->db);
+        // print_r($materiasReporbadas);
 
         $materiasPorCargar = getFailed(substr($token, 0, 8), $this->db);
+        // print_r($materiasPorCargar);
+
 
         // $materiasPorCargar =array();
 
-
-        $asignaturasACursar = $this->db->ExecuteSQL("SELECT o.`id_asignatura` FROM oferta AS o LEFT JOIN `asignatura_requisito` ar ON ar.`id_obligatoria` = o.`id_asignatura` LEFT JOIN `kardex` k ON ar.`id_requisito` = k.`id_asignatura` LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura` WHERE k.`situacion` = 1 GROUP BY o.`id_asignatura`");
+        $asignaturasACursar = $this->db->ExecuteSQL("SELECT 
+            o.`id_asignatura` FROM oferta AS o 
+            LEFT JOIN `asignatura_requisito` ar ON ar.`id_obligatoria` = o.`id_asignatura` 
+            LEFT JOIN `kardex` k ON ar.`id_requisito` = k.`id_asignatura` 
+            LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura` 
+            WHERE k.`situacion` = 1 
+            GROUP BY o.`id_asignatura`");
 
         if ($asignaturasACursar) { 
 
@@ -199,7 +207,11 @@ class API extends REST {
                     $asignaturaDependenciasWhere .= " ";
                 }
 
-                $asignaturaDependencias = $this->db->ExecuteSQL("SELECT ar.`id_obligatoria`, ar.`id_requisito` FROM `asignatura_requisito` AS ar " . $asignaturaDependenciasWhere);
+                $asignaturaDependencias = $this->db->ExecuteSQL("SELECT 
+                    ar.`id_obligatoria`
+                    , ar.`id_requisito` 
+                    FROM `asignatura_requisito` AS ar 
+                    " . $asignaturaDependenciasWhere);
 
                 if ($asignaturaDependencias) {
                     if (is_bool($asignaturaDependencias)) {
@@ -227,13 +239,15 @@ class API extends REST {
                             }
                         }
 
+                        // print_r($materiasACurso);
+
                         $extraordinarios = array();
 
 
                         foreach ($materiasPorCargar as $key => $value) {
                             if ($value['tipo'] == 0) {
                                 $materiasACurso[] = $value['id'];
-                            }elseif ($value['tipo'] == 0) {
+                            }elseif ($value['tipo'] == 1) {
                                 $extraordinarios[] = $value['id'];
                             }
                         }
@@ -260,17 +274,20 @@ class API extends REST {
                             $extraordinariosWhere .= " ";
                         }
 
+                        //echo $extraordinariosWhere;
+
                         //$materiasACursoWhere .= "OR a.`id` = 7"; //TESTING
 
-                        $extraordinariosAPresentar = $this->db->ExecuteSQL("SELECT a.`nombre` FROM asignatura " .  $extraordinariosWhere);
+                        $extraordinariosAPresentar = $this->db->ExecuteSQL("SELECT a.`nombre` FROM asignatura as a " .  $extraordinariosWhere);
 
                         $asignaturasACursar = $this->db->ExecuteSQL("SELECT a.`id`,a.`nombre`, o.`profesor`, o.`lunes`, o.`martes`, o.`miercoles`, o.`jueves`, o.`viernes` FROM oferta AS o LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura`" . $materiasACursoWhere);
                         
                         $arrayName = array('Extraoridnarios' => $extraordinariosAPresentar, "Ordinarios" =>$asignaturasACursar);
 
+                        // print_r($arrayName);
                         //compararHorarios($asignaturasACursar);
 
-                        $this->response($this->json($arrayName ), 200);
+                        $this->response($this->json($arrayName), 200);
                     }
 
                     
