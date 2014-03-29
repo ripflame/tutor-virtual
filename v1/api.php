@@ -40,7 +40,8 @@ class API extends REST {
         // If the method not exist with in this class, response would be "Page not found".
     }
 
-     private function verifyToken($token)
+    //Se verifica que la token pertenesca a un usuario real
+    private function verifyToken($token)
     {
 
         if (is_null($token)) {
@@ -60,6 +61,7 @@ class API extends REST {
         }
     }
 
+    //Recibe via post matricula y password y si es correcto
     private function login()
     {
         // Cross validation if the request method is POST else it will return "Not Acceptable" status
@@ -98,7 +100,7 @@ class API extends REST {
                     $error = array('status' => "Failed", "msg" => "Invalid Email address or Password");
                     $this->response($this->json($error), 400);
                 }else{
-
+                    //regresa el hash
                     $result = array("nombre" => $loginQuery['nombre'],
                         "hash" => $loginQuery['matricula'].$loginQuery['hash'], 'status' => "Logged");
 
@@ -114,38 +116,6 @@ class API extends REST {
         $this->response($this->json($error), 400);
     }
 
-    private function test()
-    {
-        // Cross validation if the request method is POST else it will return "Not Acceptable" status
-        if($this->get_request_method() != "POST")
-        {
-            $this->response('',406);
-        }
-
-        if (!isset($this->_request['token'])) {
-            $token = NULL;
-        }else{
-            $token = $this->_request['token'];
-        }
-
-
-
-
-        if (!$this->verifyToken($token)) {
-            // If invalid inputs "Bad Request" status message and reason
-            $error = array('status' => "Failed", "msg" => "Invalid Email address or Password");
-            $this->response($this->json($error), 400);
-        }
-
-        $matricula = substr($token, 0, 8);
-
-        //GIL
-
-
-
-        $error = array('status' => "Correct", "msg" => "You have access.");
-        $this->response($this->json($error), 400);
-    }
 
     private function getCarga()
     {
@@ -169,15 +139,17 @@ class API extends REST {
 
         $carga = array();
 
+        //id de materias que tiene reprobadas
         $materiasReporbadas = getFailedIds(substr($token, 0, 8), $this->db);
         // print_r($materiasReporbadas);
 
+        //id de materias que debe cargar obligatoriamente y el tipo de curso que debara llevar
         $materiasPorCargar = getFailed(substr($token, 0, 8), $this->db);
         // print_r($materiasPorCargar);
 
 
         // $materiasPorCargar =array();
-
+        //regresa todas las opciones de materias que no haya curzado verificando que tenga al menos uno de los requisitos
         $asignaturasACursar = $this->db->ExecuteSQL("SELECT 
             o.`id_asignatura` FROM oferta AS o 
             LEFT JOIN `asignatura_requisito` ar ON ar.`id_obligatoria` = o.`id_asignatura` 
@@ -196,6 +168,7 @@ class API extends REST {
 
                 $disponibles = array();
 
+                //Genera un where con las amaterias que no a llevado que podria llevar
                 $asignaturaDependenciasWhere = "WHERE ";
                 
                 for ($i=0; $i < count($asignaturasACursar); $i++) { 
@@ -207,6 +180,7 @@ class API extends REST {
                     $asignaturaDependenciasWhere .= " ";
                 }
 
+                //obitiene todas las materias necesarias para poder cursar otra materia
                 $asignaturaDependencias = $this->db->ExecuteSQL("SELECT 
                     ar.`id_obligatoria`
                     , ar.`id_requisito` 
@@ -220,6 +194,7 @@ class API extends REST {
 
                         $materias = array();
 
+                        // acomoda los ids en arreglos
                         foreach ($asignaturaDependencias as $value) {
 
                             $idMateriaPrincipal = $value['id_obligatoria'];
@@ -227,7 +202,7 @@ class API extends REST {
                         }
 
                         $materiasACurso = array();
-
+                         //verifica que si en las obligatorias de requisito existe alguna en deuda, no permita cargar
                         foreach ($materias as $key => $value) {
                             $result = array_intersect($materias[$key], $materiasReporbadas);
 
@@ -243,7 +218,7 @@ class API extends REST {
 
                         $extraordinarios = array();
 
-
+                        // acomoda las materias a l grupo que pertenecen
                         foreach ($materiasPorCargar as $key => $value) {
                             if ($value['tipo'] == 0) {
                                 $materiasACurso[] = $value['id'];
@@ -251,6 +226,8 @@ class API extends REST {
                                 $extraordinarios[] = $value['id'];
                             }
                         }
+
+                        //genera un where para las materias que llevara como ordinario
 
                         $materiasACursoWhere = "WHERE ";
                 
@@ -263,6 +240,8 @@ class API extends REST {
                             $materiasACursoWhere .= " ";
                         }
 
+
+                        //genera where para las materias que pueden ser un presentadas en extraoridnario
                         $extraordinariosWhere = "WHERE ";
                         
                         for ($i=0; $i < count($extraordinarios); $i++) { 
@@ -274,18 +253,18 @@ class API extends REST {
                             $extraordinariosWhere .= " ";
                         }
 
-                        //echo $extraordinariosWhere;
-
-                        //$materiasACursoWhere .= "OR a.`id` = 7"; //TESTING
-
+                        //Se obtienen las materias en ordinario y extraoridnario
                         $extraordinariosAPresentar = $this->db->ExecuteSQL("SELECT a.`nombre` FROM asignatura as a " .  $extraordinariosWhere);
 
-                        $asignaturasACursar = $this->db->ExecuteSQL("SELECT a.`id`,a.`nombre`, o.`profesor`, o.`lunes`, o.`martes`, o.`miercoles`, o.`jueves`, o.`viernes` FROM oferta AS o LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura`" . $materiasACursoWhere);
+                        $asignaturasACursar = $this->db->ExecuteSQL("SELECT a.`id`,a.`nombre`, o.`profesor`, o.`lunes`, o.`martes`, o.`miercoles`, o.`jueves`, o.`viernes` FROM oferta AS o LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura`" . $materiasACursoWhere. " Order by a.`nombre` asc");
                         
-                        $arrayName = array('Extraoridnarios' => $extraordinariosAPresentar, "Ordinarios" =>$asignaturasACursar);
+                        $horario = compararHorarios($asignaturasACursar);
+
+                        $arrayName = array('Extraoridnarios' => $extraordinariosAPresentar, "Ordinarios" =>$horario);
 
                         // print_r($arrayName);
-                        //compararHorarios($asignaturasACursar);
+                        
+
 
                         $this->response($this->json($arrayName), 200);
                     }
