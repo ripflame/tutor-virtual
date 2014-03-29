@@ -173,7 +173,7 @@ class API extends REST {
 
         $materiasPorCargar = getFailed(substr($token, 0, 8), $this->db);
 
-        $materiasPorCargar =array();
+        // $materiasPorCargar =array();
 
 
         $asignaturasACursar = $this->db->ExecuteSQL("SELECT o.`id_asignatura` FROM oferta AS o LEFT JOIN `asignatura_requisito` ar ON ar.`id_obligatoria` = o.`id_asignatura` LEFT JOIN `kardex` k ON ar.`id_requisito` = k.`id_asignatura` LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura` WHERE k.`situacion` = 1 GROUP BY o.`id_asignatura`");
