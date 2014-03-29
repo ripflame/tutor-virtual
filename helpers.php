@@ -8,7 +8,7 @@
         echo "</pre>";
     } 
 
-    function usortTest($a, $b) {
+    function usortSituacion($a, $b) {
 
             if ($a['situacion']>$b['situacion']) {
                 return 1;

@@ -24,11 +24,7 @@ if ($query) {
     }else{
 
 
-        usort($query, "usortTest");
-
-        // prettyArray($query);
-
-        // echo "____________";
+        usort($query, "usortSituacion");
 
         $hashmap = array();
 
@@ -46,7 +42,6 @@ if ($query) {
 
             }else{
 
-
                 $periodoAnterior = explode("-", $hashmap[$value['nombre']]['periodo']);
 
                 $periodoActual = explode("-", $value['periodo']);
@@ -54,40 +49,54 @@ if ($query) {
 
                 if ($periodoActual[0] > $periodoAnterior[0]) {
 
-                    $hashmap[$value['nombre']]['periodoPasado'][] = implode("-", $periodoAnterior);
+                    if (isset($hashmap[$value['nombre']]['periodosPasados'])) {
+
+                       $value['periodosPasados'] = $hashmap[$value['nombre']]['periodosPasados'];
+
+                    }
+
+                    $value['periodosPasados'][] = implode("-", $periodoAnterior);
+
+                    $hashmap[$value['nombre']] = $value;
 
                 }else if($periodoActual[0] == $periodoAnterior[0]){
 
-                    if ($periodoActual[1] == "ago") {
+                    if ($periodoActual[1] == "ene" && $periodoAnterior[1] == "ago") {
+
+                        $hashmap[$value['nombre']]['periodosPasados'][] = implode("-", $periodoActual);
+
+                    }elseif ($periodoActual[1] == "ago" && $periodoAnterior[1] == "ago") {
+
+                        $hashmap[$value['nombre']]['periodosPasados'][] = implode("-", $periodoActual);
+
+                    }elseif ($periodoActual[1] == "ene" && $periodoAnterior[1] == "ene") {
+
+                        $hashmap[$value['nombre']]['periodosPasados'][] = implode("-", $periodoActual);
+
+                    }elseif ($periodoActual[1] == "ago" && $periodoAnterior[1] == "ene") {
+
+                        if (isset($hashmap[$value['nombre']]['periodosPasados'])) {
+
+                            $value['periodosPasados'] = $hashmap[$value['nombre']]['periodosPasados'];
+
+                        }
+
+                        $value['periodosPasados'][] = implode("-", $periodoAnterior);
 
                         $hashmap[$value['nombre']] = $value;
-
-                        $hashmap[$value['nombre']]['periodoPasado'][] = implode("-", $periodoAnterior);
-
-
-                    } elseif ($periodoAnterior[1] == "ago") {
-
-                        $hashmap[$value['nombre']]['periodoPasado'][] = implode("-", $periodoAnterior);
+                        
 
                     }
 
                 }else if($periodoActual[0] < $periodoAnterior[0]){
 
-                    $hashmap[$value['nombre']]['periodoPasado'][] = implode("-", $periodoAnterior);
-                    
-
+                    $hashmap[$value['nombre']]['periodosPasados'][] = implode("-", $periodoActual);
 
                 }
-
-
 
             }
 
         }
-
-        // prettyArray($hashmap);
-
-        //Se eliminan las repobadas
 
         foreach ($hashmap as $key => $value) {
 
