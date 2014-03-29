@@ -100,7 +100,7 @@ class API extends REST {
                 }else{
 
                     $result = array("nombre" => $loginQuery['nombre'],
-                        "hash" => $loginQuery['matricula'].$loginQuery['hash']);
+                        "hash" => $loginQuery['matricula'].$loginQuery['hash'], 'status' => "Logged");
 
                     $this->response($this->json($result), 200);
 
@@ -261,15 +261,17 @@ class API extends REST {
                             $extraordinariosWhere .= " ";
                         }
 
-                        $materiasACursoWhere .= "OR a.`id` = 7"; //TESTING
+                        //$materiasACursoWhere .= "OR a.`id` = 7"; //TESTING
 
                         $extraordinariosAPresentar = $this->db->ExecuteSQL("SELECT a.`nombre` FROM asignatura " .  $extraordinariosWhere);
 
                         $asignaturasACursar = $this->db->ExecuteSQL("SELECT a.`id`,a.`nombre`, o.`profesor`, o.`lunes`, o.`martes`, o.`miercoles`, o.`jueves`, o.`viernes` FROM oferta AS o LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura`" . $materiasACursoWhere);
                         
-                        compararHorarios($asignaturasACursar);
+                        $arrayName = array('Extraoridnarios' => $extraordinariosAPresentar, "Ordinarios" =>$asignaturasACursar);
 
-                        $this->response($this->json($asignaturasACursar), 200);
+                        //compararHorarios($asignaturasACursar);
+
+                        $this->response($this->json($arrayName ), 200);
                     }
 
                     
