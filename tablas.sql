@@ -2,7 +2,8 @@
 SQLyog Ultimate v11.11 (64 bit)
 MySQL - 5.6.14 : Database - tutorvirtual
 *********************************************************************
-*/
+*/
+
 
 /*!40101 SET NAMES utf8 */;
 
@@ -26,12 +27,13 @@ CREATE TABLE `alumno` (
   `nombre` varchar(50) NOT NULL DEFAULT '',
   `password` varchar(50) NOT NULL DEFAULT '',
   `fecha_registro` varchar(50) NOT NULL DEFAULT '',
+  `hash` varchar(20) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 /*Data for the table `alumno` */
 
-insert  into `alumno`(`id`,`matricula`,`nombre`,`password`,`fecha_registro`) values (1,'12216317','Fulanito Perez','123456','06/08/2012');
+insert  into `alumno`(`id`,`matricula`,`nombre`,`password`,`fecha_registro`,`hash`) values (1,'12216317','Fulanito Perez','f865b53623b121fd34ee5426c792e5c33af8c227','06/08/2012','SbIhVaF3HJRmqFLFbshQ');
 
 /*Table structure for table `asignatura` */
 
@@ -46,7 +48,7 @@ CREATE TABLE `asignatura` (
 
 /*Data for the table `asignatura` */
 
-insert  into `asignatura`(`id`,`nombre`,`creditos`) values (1,'ÁLGEBRA SUPERIOR I',10),(2,'CÁLCULO I',23),(3,'COMPUTACIÓN I',10),(4,'ÁLGEBRA SUPERIOR II',10),(5,'CÁLCULO II',23),(6,'COMPUTACIÓN II',10),(7,'ÁLGEBRA LINEAL 1',10),(8,'ANÁLISIS NUMÉRICO I',10),(9,'ECUACIONES DIFERENCIALES I',10),(10,'ÁLGEBRA LINEAL II',10),(11,'ANÁLISIS NUMÉRICO II',10),(12,'ECUACIONES DIFERENCIALES II',10),(13,'CALCULO III',23);
+insert  into `asignatura`(`id`,`nombre`,`creditos`) values (1,'ALGEBRA SUPERIOR I',10),(2,'CALCULO I',23),(3,'COMPUTACIÓN I',10),(4,'ALGEBRA SUPERIOR II',10),(5,'CALCULO II',23),(6,'COMPUTACION II',10),(7,'ALGEBRA LINEAL 1',10),(8,'ANALISIS NUMERICO I',10),(9,'ECUACIONES DIFERENCIALES I',10),(10,'ALGEBRA LINEAL II',10),(11,'ANALISIS NUMERICO II',10),(12,'ECUACIONES DIFERENCIALES II',10),(13,'CALCULO III',23);
 
 /*Table structure for table `asignatura_requisito` */
 
