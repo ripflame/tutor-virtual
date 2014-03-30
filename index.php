@@ -5,6 +5,8 @@
 
 require 'helpers.php';
 
+
+//devuelve las materias tronadas que deberias cargar
 function getFailed($matricula, $db){
     $query = $db->ExecuteSQL("SELECT
         a.`id`
@@ -30,6 +32,7 @@ function getFailed($matricula, $db){
         }
     }
 }
+//devuelve los id de  materias tronadas 
 
 function getFailedIds($matricula, $db){
     $query = $db->ExecuteSQL("SELECT
@@ -56,7 +59,7 @@ function getFailedIds($matricula, $db){
         }
     }
 }
-
+//devuelve las materias  que deberias cargar
 function getSubjectsToCharge($failedSubjects){
     $results = array();
 
@@ -88,6 +91,7 @@ function getSubjectsToCharge($failedSubjects){
     return $results;
 }
 
+//devuelve las materias tronadas que deberias cargar
 function getFailedSubjectsIds($failedSubjects){
     $results = array();
 
@@ -96,6 +100,7 @@ function getFailedSubjectsIds($failedSubjects){
     }
     return $results;
 }
+//devuelve las materias tronadas
 
 function getFailedSubjects($queryResult) {
     // prettyArray($query);
@@ -152,8 +157,43 @@ function getFailedSubjects($queryResult) {
     // prettyArray($results);
     return $results;
 }
+//crea horario sin comparativas
+function compararHorarios($horarios){
 
-function compararHorarios($horarios, $restriccionHoras = array('inicio' => "7:30",'fin' => "15:00")){
+    $horarioFinal = array();
+
+    // shuffle($horarios); // Se randomiza para seleccionar una materia al azar.
+    // falta Query para ordenar por nombre.
+
+    $i = 0;
+    foreach ($horarios as $key => $value) {
+        // Se selecciona la primera materia.
+        if ($horarioFinal[$i] == null) {
+            $horarioFinal[$i] = $value;
+
+        } elseif ($horarioFinal[$i] == $value['id']) { // Verificamos si la asignatura ya está cargada.
+            // De aparecer nuevamente, es ignorada.
+
+        } elseif($horarioFinal[$i]['id'] != $value['id']) { // De no estar cargada, se verifica que no choquen los horarios
+            // Verificamos si coinciden en horario
+            if ( ($horarioFinal[$i]['lunes'] != null && $horarioFinal[$i]['lunes'] == $value['lunes']) 
+                || ($horarioFinal[$i]['martes'] != null && $horarioFinal[$i]['lunes'] == $value['martes'])
+                || ($horarioFinal[$i]['miercoles'] != null && $horarioFinal[$i]['lunes'] == $value['miercoles'])
+                || ($horarioFinal[$i]['jueves'] != null && $horarioFinal[$i]['lunes'] == $value['jueves'])
+                || ($horarioFinal[$i]['viernes'] != null && $horarioFinal[$i]['lunes'] == $value['viernes']) ) {
+            } else {
+                $i++;
+                $horarioFinal[$i] = $value;
+            }
+        } 
+    }
+
+
+    return $horarioFinal;
+  
+}
+//crear materias con restricciones del horario de usuario
+function compararHorariosRestricccion($horarios, $restriccionHoras = array('inicio' => "7:30",'fin' => "15:00")){
 
     $horarioFinal = array();
 

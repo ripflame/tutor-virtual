@@ -258,11 +258,12 @@ class API extends REST {
 
                         $asignaturasACursar = $this->db->ExecuteSQL("SELECT a.`id`,a.`nombre`, o.`profesor`, o.`lunes`, o.`martes`, o.`miercoles`, o.`jueves`, o.`viernes` FROM oferta AS o LEFT JOIN `asignatura` AS a ON a.`id` = o.`id_asignatura`" . $materiasACursoWhere. " Order by a.`nombre` asc");
                         
-                        // $horario = compararHorarios($asignaturasACursar);
+                        $horario = compararHorarios($asignaturasACursar);
 
-                        // $arrayName = array('Extraoridnarios' => $extraordinariosAPresentar, "Ordinarios" =>$horario);
-                        $arrayName = array('Extraoridnarios' => $extraordinariosAPresentar, 
-                            "Ordinarios" =>$asignaturasACursar);
+                        $arrayName = array('Extraoridnarios' => $extraordinariosAPresentar, "Ordinarios" =>$horario);
+
+                        // $arrayName = array('Extraoridnarios' => $extraordinariosAPresentar, 
+                            // "Ordinarios" =>$asignaturasACursar);
 
                         // print_r($arrayName);
                         
